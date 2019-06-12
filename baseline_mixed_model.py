@@ -17,7 +17,7 @@ and perform ridge on the residuals (Y - ZA ~ N(XB, sigma)
 
 
 """
-def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, missing_rate = 0.1, sample_list = list()):
+def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, missing_rate = 0.1, sample_list = list(), verbose = False):
 
 	corr_mat = calculate_highly_correlated_phenotypes(pheno_df)
 
@@ -27,7 +27,7 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 	phenotype_list = [phenotype_1, phenotype_2]
 
 	# extract the phenotypes 
-	geno_select, pheno_select = select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list = phenotype_list)
+	geno_select, pheno_select = select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list = phenotype_list, verbose = verbose)
 
 	# separate training and test dataset 
 	geno_tr, pheno_tr, geno_test, pheno_test, test_sample_list = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate, sample_list_select = sample_list)
@@ -35,8 +35,9 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 	# perform OLS 
 	lm = sm.OLS(endog = pheno_tr[phenotype_2], exog = pheno_tr[phenotype_1]).fit()
 	
-	print("The linear model summary for predicting phenotype %a based on phenotype %a" % (phenotype_2, phenotype_1))
-	print(lm.summary())
+	if verbose:	
+		print("The linear model summary for predicting phenotype %a based on phenotype %a" % (phenotype_2, phenotype_1))
+		print(lm.summary())	
 
 	# prediction for fixed effect
 	predictions_fe = lm.predict(pheno_test[phenotype_1])
@@ -46,7 +47,8 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 
 	lm_re = sm.OLS(endog = residuals, exog = geno_tr.transpose()).fit_regularized()
 
-	print(lm_re.summary())
+	if verbose: 
+		print(lm_re.summary())
 
 	predictions_re = lm_re.predict(geno_test.transpose())
 

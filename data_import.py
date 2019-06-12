@@ -102,7 +102,7 @@ def select_phenotype_islets(geno_df, pheno_df, phenotype = "num_islets"):
 
 	return genotype_complete_dropNA, phenotype_complete
 
-def select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list):
+def select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list, verbose = False):
 	# select a phenotype for genotype baseline model 
 	# we are going to use num_islets as the test phenotype for baseline model
 	phenotype = pheno_df[phenotype_list]
@@ -110,8 +110,9 @@ def select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list):
 	# ID samples with missing phenotype
 	samples_with_missing_pheno = phenotype[phenotype < -99999].dropna(how = "any").index.tolist()
 
-	print("These samples are missing phenotypes:")
-	print(samples_with_missing_pheno)
+	if verbose:
+		print("These samples are missing phenotypes:")
+		print(samples_with_missing_pheno)
 
 	# select samples with known phenotypes
 	phenotype_complete = pd.DataFrame(phenotype[~phenotype.index.isin(samples_with_missing_pheno)])
@@ -122,18 +123,20 @@ def select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list):
 	# select genotype
 	genotype_complete = geno_df[complete_sample_list]
 
-	print(genotype_complete.shape)
+	if verbose:
+		print(genotype_complete.shape)
 
 	# clean snps with missing geno 
 	genotype_complete_dropNA = genotype_complete.dropna()
 
-	print(genotype_complete_dropNA.shape)
-	print(phenotype_complete.shape)
+	if verbose:
+		print(genotype_complete_dropNA.shape)
+		print(phenotype_complete.shape)
 
 
 	return genotype_complete_dropNA, phenotype_complete
 
-def select_phenotype_single_phenotype(geno_df, pheno_df, phenotype_list):
+def select_phenotype_single_phenotype(geno_df, pheno_df, phenotype_list, verbose = False):
 	# select a phenotype for genotype baseline model 
 	# we are going to use num_islets as the test phenotype for baseline model
 	phenotype = pheno_df[phenotype_list]
@@ -141,8 +144,9 @@ def select_phenotype_single_phenotype(geno_df, pheno_df, phenotype_list):
 	# ID samples with missing phenotype
 	samples_with_missing_pheno = phenotype[phenotype < -99999].dropna(how = "any").index.tolist()
 
-	print("These samples are missing phenotypes:")
-	print(samples_with_missing_pheno)
+	if verbose:
+		print("These samples are missing phenotypes:")
+		print(samples_with_missing_pheno)
 
 	# select samples with known phenotypes
 	phenotype_complete = pd.DataFrame(phenotype[~phenotype.index.isin(samples_with_missing_pheno)])
@@ -153,13 +157,15 @@ def select_phenotype_single_phenotype(geno_df, pheno_df, phenotype_list):
 	# select genotype
 	genotype_complete = geno_df[complete_sample_list]
 
-	print(genotype_complete.shape)
+	if verbose:
+		print(genotype_complete.shape)
 
 	# clean snps with missing geno 
 	genotype_complete_dropNA = genotype_complete.dropna()
-
-	print(genotype_complete_dropNA.shape)
-	print(phenotype_complete.shape)
+	
+	if verbose:
+		print(genotype_complete_dropNA.shape)
+		print(phenotype_complete.shape)
 
 
 	return genotype_complete_dropNA, phenotype_complete

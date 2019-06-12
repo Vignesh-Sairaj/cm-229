@@ -22,7 +22,7 @@ def calculate_highly_correlated_phenotypes(pheno_df, low_threshold = 0.5, high_t
 perform phenotype correlation analysis
 Phenotype 1 is used to predict phenotype 2
 """
-def phenotype_correlation_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, missing_rate = 0.1, sample_list = list()):
+def phenotype_correlation_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, missing_rate = 0.1, sample_list = list(), verbose = False):
 
 	corr_mat = calculate_highly_correlated_phenotypes(pheno_df)
 
@@ -32,18 +32,17 @@ def phenotype_correlation_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, 
 	phenotype_list = [phenotype_1, phenotype_2]
 
 	# extract the phenotypes 
-	geno_select, pheno_select = select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list = phenotype_list)
+	geno_select, pheno_select = select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list = phenotype_list, verbose = verbose)
 
 	# separate training and test dataset 
 	geno_tr, pheno_tr, geno_test, pheno_test, test_sample_list = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate, sample_list_select = sample_list)
 
-	print(pheno_tr)
-
 	# perform OLS 
 	lm = sm.OLS(endog = pheno_tr[phenotype_2], exog = pheno_tr[phenotype_1]).fit()
 	
-	print("The linear model summary for predicting phenotype %a based on phenotype %a" % (phenotype_2, phenotype_1))
-	print(lm.summary())
+	if verbose:
+		print("The linear model summary for predicting phenotype %a based on phenotype %a" % (phenotype_2, phenotype_1))
+		print(lm.summary())
 
 	predictions = lm.predict(pheno_test[phenotype_1])
 
