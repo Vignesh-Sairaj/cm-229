@@ -133,6 +133,37 @@ def select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list):
 
 	return genotype_complete_dropNA, phenotype_complete
 
+def select_phenotype_single_phenotype(geno_df, pheno_df, phenotype_list):
+	# select a phenotype for genotype baseline model 
+	# we are going to use num_islets as the test phenotype for baseline model
+	phenotype = pheno_df[phenotype_list]
+
+	# ID samples with missing phenotype
+	samples_with_missing_pheno = phenotype[phenotype < -99999].dropna(how = "any").index.tolist()
+
+	print("These samples are missing phenotypes:")
+	print(samples_with_missing_pheno)
+
+	# select samples with known phenotypes
+	phenotype_complete = pd.DataFrame(phenotype[~phenotype.index.isin(samples_with_missing_pheno)])
+
+	# save the complete_sample_list for identifying matching genotype
+	complete_sample_list = phenotype_complete.index.tolist()
+
+	# select genotype
+	genotype_complete = geno_df[complete_sample_list]
+
+	print(genotype_complete.shape)
+
+	# clean snps with missing geno 
+	genotype_complete_dropNA = genotype_complete.dropna()
+
+	print(genotype_complete_dropNA.shape)
+	print(phenotype_complete.shape)
+
+
+	return genotype_complete_dropNA, phenotype_complete
+
 
 
 def separate_training_test(geno_df, pheno_df, missing_rate = 0.1):
