@@ -17,7 +17,7 @@ and perform ridge on the residuals (Y - ZA ~ N(XB, sigma)
 
 
 """
-def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, missing_rate = 0.1):
+def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, missing_rate = 0.1, sample_list = list()):
 
 	corr_mat = calculate_highly_correlated_phenotypes(pheno_df)
 
@@ -30,7 +30,7 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 	geno_select, pheno_select = select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list = phenotype_list)
 
 	# separate training and test dataset 
-	geno_tr, pheno_tr, geno_test, pheno_test = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate)
+	geno_tr, pheno_tr, geno_test, pheno_test, test_sample_list = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate, sample_list_select = sample_list)
 
 	# perform OLS 
 	lm = sm.OLS(endog = pheno_tr[phenotype_2], exog = pheno_tr[phenotype_1]).fit()
@@ -55,4 +55,4 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 
 	mse = calculate_MSE(total_prediction, pheno_test[phenotype_2])
 
-	return(mse)
+	return(mse, test_sample_list)

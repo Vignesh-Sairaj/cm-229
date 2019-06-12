@@ -166,13 +166,18 @@ def select_phenotype_single_phenotype(geno_df, pheno_df, phenotype_list):
 
 
 
-def separate_training_test(geno_df, pheno_df, missing_rate = 0.1):
+def separate_training_test(geno_df, pheno_df, missing_rate = 0.1, sample_list_select = list()):
 
 	sample_list = geno_df.columns.to_list()
 
-	missing_num = int(0.1 * geno_df.shape[1])
+	missing_num = int(missing_rate * geno_df.shape[1])
 
-	sample_list_testing = np.random.choice(sample_list, int(missing_num))
+	if len(sample_list_select) == 0: # if sample list is NOT give, then select samples randomly
+		sample_list_testing = np.random.choice(sample_list, int(missing_num))
+	else: # if sample list is given 
+		sample_list_testing = sample_list_select
+
+
 	sample_list_training = [ x for x in sample_list if x not in sample_list_testing ]
 	
 	# separate the training and test 
@@ -182,7 +187,7 @@ def separate_training_test(geno_df, pheno_df, missing_rate = 0.1):
 	genotype_testing = geno_df[sample_list_testing]
 	genotype_training = geno_df[sample_list_training]
 
-	return genotype_training, phenotype_training, genotype_testing, phenotype_testing
+	return genotype_training, phenotype_training, genotype_testing, phenotype_testing, sample_list_testing
 
 
 
