@@ -6,6 +6,7 @@ import numpy as np
 from data_import import *
 import statsmodels.api as sm
 from phenotype_correlation import *
+from sklearn.linear_model import Ridge 
 
 """
 baseline mixed model 
@@ -77,21 +78,38 @@ def top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, 
 	# separate training and test dataset 
 	geno_tr, pheno_tr, geno_test, pheno_test, test_sample_list = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate, sample_list_select = sample_list)
 
-	# perform simple ridge to identify the top SNPs 
-	lm_ridge = sm.OLS(endog = pheno_tr[phenotype_2], exog = geno_tr.transpose()).fit_regularized(L1_wt = 1.0)
+	# saving below 
+	# # perform simple ridge to identify the top SNPs 
+	# lm_ridge = sm.OLS(endog = pheno_tr[phenotype_2], exog = geno_tr.transpose()).fit_regularized(L1_wt = 1.0)
 
-	if verbose: 
-	    print(lm_ridge.params)
+	# if verbose: 
+	#     print(lm_ridge.params)
 
-	# select top SNPs with highest effect size for select run
-	top_N_idx = np.argsort(abs(lm_ridge.params))[-top_N:]
+	# # select top SNPs with highest effect size for select run
+	# top_N_idx = np.argsort(abs(lm_ridge.params))[-top_N:]
 
-	if verbose:
-		top_N_values = [lm_re.params[i] for i in top_N_idx]
-		print(top_N_values)
+	# if verbose:
+	# 	top_N_values = [lm_re.params[i] for i in top_N_idx]
+	# 	print(top_N_values)
+
+	# top_N_snps = geno_tr.iloc[top_N_idx].index
+
+	# sklearn test 
+
+	clf = Ridge(alpha = 1.0)
+	a = clf.fit(y = pheno_tr[phenotype_2], X = geno_tr.transpose())
+
+	# select top N 
+	top_N = 10
+	top_N_idx = np.argsort(abs(a.coef_))[-top_N:]
+
+	print (top_N_idx)
+
+	top_N_values = [a.coef_[i] for i in top_N_idx]
+	print (top_N_values)
 
 	top_N_snps = geno_tr.iloc[top_N_idx].index
-
+	print(top_N_snps)
 
 
 	# perform OLS 
