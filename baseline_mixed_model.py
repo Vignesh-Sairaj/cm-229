@@ -46,7 +46,7 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 	# perform ridge regression on the residual (random effect part)
 	residuals = pheno_tr[phenotype_2] - lm.predict(pheno_tr[phenotype_1])
 
-	lm_re = sm.OLS(endog = residuals, exog = geno_tr.transpose()).fit_regularized(L1_wt = 0.0)
+	lm_re = sm.OLS(endog = residuals, exog = geno_tr.transpose()).fit_regularized(L1_wt = 1.0)
 
 	if verbose: 
 		print(lm_re.params)
@@ -78,7 +78,7 @@ def top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, 
 	geno_tr, pheno_tr, geno_test, pheno_test, test_sample_list = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate, sample_list_select = sample_list)
 
 	# perform simple ridge to identify the top SNPs 
-	lm_ridge = sm.OLS(endog = pheno_tr[phenotype_2], exog = geno_tr.transpose()).fit_regularized(L1_wt = 0.0)
+	lm_ridge = sm.OLS(endog = pheno_tr[phenotype_2], exog = geno_tr.transpose()).fit_regularized(L1_wt = 1.0)
 
 	if verbose: 
 	    print(lm_ridge.params)
@@ -108,7 +108,7 @@ def top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, 
 	# perform ridge regression on the residual (random effect part)
 	residuals = pheno_tr[phenotype_2] - lm.predict(pheno_tr[phenotype_1])
 
-	lm_re = sm.OLS(endog = residuals, exog = geno_tr.loc[top_N_snps].transpose()).fit_regularized(L1_wt = 0.0)
+	lm_re = sm.OLS(endog = residuals, exog = geno_tr.loc[top_N_snps].transpose()).fit_regularized(L1_wt = 1.0)
 
 	if verbose: 
 	    print(lm_re.params)

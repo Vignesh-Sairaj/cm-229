@@ -42,7 +42,7 @@ for i in range(num_runs):
     result_mm = pd.DataFrame([missing_rate, i, mm_mse, "Baseline_mixed_model"])
     result_list.append(result_mm)
     
-    mm_mse, _sample_list = top_N_mixed_model_analysis(geno_df, pheno_df, phenotype_2, phenotype_1, missing_rate = missing_rate, sample_list = test_sample_list, top_N = 100)
+    mm_mse, _sample_list = top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_2, phenotype_1, missing_rate = missing_rate, sample_list = test_sample_list, top_N = 10)
     result_mm = pd.DataFrame([missing_rate, i, mm_mse, "top_N_mixed_model"])
     result_list.append(result_mm)
 
