@@ -59,3 +59,65 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 	mse = calculate_MSE(total_prediction, pheno_test[phenotype_2])
 
 	return(mse, test_sample_list)
+
+
+
+def top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, top_N = 100, missing_rate = 0.1, sample_list = list(), verbose = False):
+
+	corr_mat = calculate_highly_correlated_phenotypes(pheno_df)
+
+	print("The correlation between %s and %s is %f" % (phenotype_1, phenotype_2, corr_mat[phenotype_1][phenotype_2]))
+
+	# bind phenotype into list to extract
+	phenotype_list = [phenotype_1, phenotype_2]
+
+	# extract the phenotypes 
+	geno_select, pheno_select = select_phenotype_multiple_phenotypes(geno_df, pheno_df, phenotype_list = phenotype_list, verbose = verbose)
+
+	# separate training and test dataset 
+	geno_tr, pheno_tr, geno_test, pheno_test, test_sample_list = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate, sample_list_select = sample_list)
+
+	# perform simple ridge to identify the top SNPs 
+	lm_ridge = sm.OLS(endog = pheno_tr[phenotype_2], exog = geno_tr.transpose()).fit_regularized(L1_wt = 0.0)
+
+	if verbose: 
+	    print(lm_ridge.params)
+
+	# select top SNPs with highest effect size for select run
+	top_N_idx = np.argsort(abs(lm_ridge.params))[-top_N:]
+
+	if verbose:
+		top_N_values = [lm_re.params[i] for i in top_N_idx]
+		print(top_N_values)
+
+	top_N_snps = geno_tr.iloc[top_N_idx].index
+
+
+
+	# perform OLS 
+	lm = sm.OLS(endog = pheno_tr[phenotype_2], exog = pheno_tr[phenotype_1]).fit()
+	
+	if verbose:	
+		print("The linear model summary for predicting phenotype %a based on phenotype %a" % (phenotype_2, phenotype_1))
+		print(lm.summary())	
+		print(lm.params)	
+
+	# prediction for fixed effect
+	predictions_fe = lm.predict(pheno_test[phenotype_1])
+
+	# perform ridge regression on the residual (random effect part)
+	residuals = pheno_tr[phenotype_2] - lm.predict(pheno_tr[phenotype_1])
+
+	lm_re = sm.OLS(endog = residuals, exog = geno_tr.loc[top_N_snps].transpose()).fit_regularized(L1_wt = 0.0)
+
+	if verbose: 
+	    print(lm_re.params)
+
+	predictions_re = lm_re.predict(geno_test.loc[top_N_snps].transpose())
+
+	# combine the result from both
+	total_prediction = predictions_fe + predictions_re
+
+	mse = calculate_MSE(total_prediction, pheno_test[phenotype_2])
+
+	return(mse, test_sample_list)

@@ -68,7 +68,19 @@ def import_data_svenson():
 	# select the phenotypes for the samples 
 	pheno_df_select = input_pheno_df.loc[sample_list]
 
-	return geno_df_select, pheno_df_select 
+	# normalize the genotype 
+	print("Standardizing genotype")
+	geno_df_select_transpose = geno_df_select.transpose()
+	normalized_geno_df_select = (geno_df_select_transpose - \
+		np.nanmean(geno_df_select_transpose, axis=0))/np.nanstd(geno_df_select_transpose, axis=0) 
+
+	# drop missing genotype columns 
+	select_markers = normalized_geno_df_select.columns[normalized_geno_df_select.count() > 0]
+
+	geno_df_filtered = normalized_geno_df_select[select_markers].transpose()
+	
+	return geno_df_filtered, pheno_df_select 
+
 
 
 def select_phenotype_islets(geno_df, pheno_df, phenotype = "num_islets"):
