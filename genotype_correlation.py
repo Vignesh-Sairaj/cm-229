@@ -42,7 +42,7 @@ def genotype_correlation_analysis_ridge(geno_df, pheno_df, phenotype, missing_ra
 	geno_tr, pheno_tr, geno_test, pheno_test, test_sample_list = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate, sample_list_select = sample_list)
 
 	# perform OLS
-	lm = sm.OLS(endog = pheno_tr[phenotype], exog = geno_tr.transpose()).fit_regularized()
+	lm = sm.OLS(endog = pheno_tr[phenotype], exog = geno_tr.transpose()).fit_regularized(L1_wt = 0.0)
 
 	if verbose:
 		print("The linear model summary for predicting phenotype %a based on genotype" % (phenotype))

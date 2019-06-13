@@ -1,0 +1,9 @@
+missing_rate,run,MSE,method
+0.1,0,19.848328703378503,Phenotype_correlation
+0.1,0,47.370875156861096,Genotype_correlation
+0.1,0,27.43019128397473,Baseline_mixed_model
+0.1,1,22.813667224866013,Phenotype_correlation
+0.1,1,32.59067380385821,Genotype_correlation
+0.1,1,21.37720282913507,Baseline_mixed_model
+0.1,2,20.810778737354944,Phenotype_correlation
+0.1,2,57.45562831598938,Genotype_correlation

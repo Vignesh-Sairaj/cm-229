@@ -38,6 +38,7 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 	if verbose:	
 		print("The linear model summary for predicting phenotype %a based on phenotype %a" % (phenotype_2, phenotype_1))
 		print(lm.summary())	
+		print(lm.params)	
 
 	# prediction for fixed effect
 	predictions_fe = lm.predict(pheno_test[phenotype_1])
@@ -45,10 +46,10 @@ def baseline_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, m
 	# perform ridge regression on the residual (random effect part)
 	residuals = pheno_tr[phenotype_2] - lm.predict(pheno_tr[phenotype_1])
 
-	lm_re = sm.OLS(endog = residuals, exog = geno_tr.transpose()).fit_regularized()
+	lm_re = sm.OLS(endog = residuals, exog = geno_tr.transpose()).fit_regularized(L1_wt = 0.0)
 
 	if verbose: 
-		print(lm_re.summary())
+		print(lm_re.params)
 
 	predictions_re = lm_re.predict(geno_test.transpose())
 
