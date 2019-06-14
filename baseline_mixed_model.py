@@ -79,9 +79,9 @@ def top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, 
 	geno_tr, pheno_tr, geno_test, pheno_test, test_sample_list = separate_training_test(geno_select, pheno_select, missing_rate = missing_rate, sample_list_select = sample_list)
 
 	# remove duplciates
-    geno_test_new = geno_test.loc[:,~geno_test.columns.duplicated()]
-    geno_test = geno_test_new[pheno_test[phenotype_2].index]
-    
+	geno_test_new = geno_test.loc[:,~geno_test.columns.duplicated()]
+	geno_test = geno_test_new[pheno_test[phenotype_2].index]
+
 	# saving below 
 	# # perform simple ridge to identify the top SNPs 
 	# lm_ridge = sm.OLS(endog = pheno_tr[phenotype_2], exog = geno_tr.transpose()).fit_regularized(L1_wt = 1.0)
@@ -100,20 +100,22 @@ def top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, 
 
 	# sklearn test 
 
-	clf = Ridge(alpha = 1.0)
-	a = clf.fit(y = pheno_tr[phenotype_2], X = geno_tr.transpose())
+	# clf = Ridge(alpha = 1.0)
+	# a = clf.fit(y = pheno_tr[phenotype_2], X = geno_tr.transpose())
 
-	# select top N 
-	top_N = 10
-	top_N_idx = np.argsort(abs(a.coef_))[-top_N:]
+	# # select top N 
+	# top_N = 10
+	# top_N_idx = np.argsort(abs(a.coef_))[-top_N:]
 
-	print (top_N_idx)
+	# print (top_N_idx)
 
-	top_N_values = [a.coef_[i] for i in top_N_idx]
-	print (top_N_values)
+	# top_N_values = [a.coef_[i] for i in top_N_idx]
+	# print (top_N_values)
 
-	top_N_snps = geno_tr.iloc[top_N_idx].index
-	print(top_N_snps)
+	# top_N_snps = geno_tr.iloc[top_N_idx].index
+	# print(top_N_snps)
+
+
 
 
 	# perform OLS 
@@ -130,15 +132,42 @@ def top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_1, phenotype_2, 
 	# perform ridge regression on the residual (random effect part)
 	residuals = pheno_tr[phenotype_2] - lm.predict(pheno_tr[phenotype_1])
 
+	# check marginal 
+
+	num_SNPs = geno_tr.shape[0]
+	beta_list = []
+
+	for snp_idx in range(num_SNPs):
+		lm_snp = sm.OLS(endog = residuals, exog = geno_tr.iloc[snp_idx].transpose()).fit_regularized(L1_wt = 1.0, alpha = 1.0)
+
+	#     clf = Ridge(alpha = 1.0)
+	#     a = clf.fit(y = residuals, X = geno_tr.iloc[snp_idx].transpose())
+		beta_list.append(lm_snp.params)
+
+		if snp_idx % 1000 == 0: 
+			print(snp_idx)
+	        
+	beta = pd.concat(beta_list)
+
+	top_N_idx = np.argsort(abs(beta))[-top_N:]
+
+	top_N_values = [beta[i] for i in top_N_idx]
+
+	top_N_snps = geno_tr.iloc[top_N_idx].index
+
+
+
 	lm_re = sm.OLS(endog = residuals, exog = geno_tr.loc[top_N_snps].transpose()).fit_regularized(L1_wt = 1.0, alpha = 1.0)
 
 	if verbose: 
-	    print(lm_re.params)
+		print(lm_re.params)
 
 	predictions_re = lm_re.predict(geno_test.loc[top_N_snps].transpose())
 
 	# combine the result from both
 	total_prediction = predictions_fe + predictions_re
+
+	print (predictions_re, predictions_fe)
 
 	mse = calculate_MSE(total_prediction, pheno_test[phenotype_2])
 

@@ -53,5 +53,5 @@ result_df = pd.concat(result_list, axis = 1).transpose()
 result_df.columns = ["missing_rate", "run", "MSE", "method"]
 
 
-result_df.to_csv('./result.%s.%s_%s.csv' % (str(missing_rate), phenotype_1, phenotype_2), index = False)
+result_df.to_csv('./result/result.%s.%s_%s.csv' % (str(missing_rate), phenotype_1, phenotype_2), index = False)
 
