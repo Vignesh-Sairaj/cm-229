@@ -15,13 +15,11 @@ geno_df, pheno_df = import_data_svenson()
 ##  actual benchmarking run 
 # testing with high correlation weight1 and length1 
 # initialization for the benchmark run
-# phenotype_1 = "weight1"
-# phenotype_2 = "length1"
+phenotype_1 = "weight1"
+phenotype_2 = "leptin"
 
 missing_rate = float(sys.argv[1])
-phenotype_1 = sys.argv[2]
-phenotype_2 = sys.argv[3]
-print(missing_rate, phenotype_1, phenotype_2)
+print(missing_rate)
 
 num_runs = 10
 
@@ -53,5 +51,5 @@ result_df = pd.concat(result_list, axis = 1).transpose()
 result_df.columns = ["missing_rate", "run", "MSE", "method"]
 
 
-result_df.to_csv('./result.%s.%s_%s.csv' % (str(missing_rate), phenotype_1, phenotype_2), index = False)
+result_df.to_csv('./result.%s.weight_leptin.csv' % (str(missing_rate)), index = False)
 
