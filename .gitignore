@@ -1,5 +1,4 @@
-*.json
-DO_Islets/*
+result_temp/*
 svenson/*
-cm-229
+DO_Islets/*
 phenix_test.ipynb
