@@ -29,7 +29,7 @@ parser.add_argument("--num_SNPs", help = "number of Top SNPS to use for the mode
 parser.add_argument("--model_test", help = "test our model only, not others", 
     action = "store_true")
 
-parser.add_argument("--num_runs", help = "number of runs to test ", default = 10)
+parser.add_argument("--num_runs", help = "number of runs to test ", default = 20)
 
 args = parser.parse_args()
 
@@ -67,17 +67,20 @@ for i in range(num_runs):
         result_mm = pd.DataFrame([missing_rate, i, mm_mse, "Baseline_mixed_model"])
         result_list.append(result_mm)
         
-        mm_top_mse, _sample_list = top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_2, phenotype_1, missing_rate = missing_rate, sample_list = test_sample_list, top_N = num_SNPs)
+        mm_top_mse, _sample_list, top_N = top_N_snp_mixed_model_analysis_p(geno_df, pheno_df, phenotype_2, phenotype_1, missing_rate = missing_rate, sample_list = test_sample_list, top_N = num_SNPs)
         result_mm_top = pd.DataFrame([missing_rate, i, mm_top_mse, "top_N_mixed_model"])
         result_list.append(result_mm_top)
     else: 
-        mm_top_mse, _sample_list = top_N_snp_mixed_model_analysis(geno_df, pheno_df, phenotype_2, phenotype_1, missing_rate = missing_rate, top_N = num_SNPs)
-        result_mm_top = pd.DataFrame([missing_rate, i, mm_top_mse, "top_N_mixed_model"])
+        mm_top_mse, _sample_list, top_N = top_N_snp_mixed_model_analysis_p(geno_df, pheno_df, phenotype_2, phenotype_1, missing_rate = missing_rate, top_N = num_SNPs)
+        result_mm_top = pd.DataFrame([missing_rate, i, mm_top_mse, "top_N_mixed_model", top_N])
         result_list.append(result_mm_top)
 
-
-result_df = pd.concat(result_list, axis = 1).transpose()
-result_df.columns = ["missing_rate", "run", "MSE", "method"]
+if not model_test_mode:
+    result_df = pd.concat(result_list, axis = 1).transpose()
+    result_df.columns = ["missing_rate", "run", "MSE", "method"]
+else:
+    result_df = pd.concat(result_list, axis = 1).transpose()
+    result_df.columns = ["missing_rate", "run", "MSE", "method", "topN"]   
 
 if model_test_mode:
     print(result_df)
